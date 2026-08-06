@@ -61,15 +61,15 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
         role = "user" if msg["role"] == "user" else "model"
         contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
 
-    # Gushaka igisubizo kivuye kuri Gemini (hamwe na Fallback)
+    # Gushaka igisubizo kivuye kuri Gemini
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             ai_response = None
             
-            # Subiramo model ya mbere: gemini-2.0-flash
+            # Gerageza gemini-2.5-flash mbere
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.0-flash",
+                    model="gemini-2.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
@@ -78,10 +78,10 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                 )
                 ai_response = response.text
             except Exception as e1:
-                # Niba gemini-2.0-flash igize ikibazo, ihite ikoresha gemini-1.5-flash
+                # Niba igize ikibazo, gerageza gemini-2.0-flash
                 try:
                     response = client.models.generate_content(
-                        model="gemini-1.5-flash",
+                        model="gemini-2.0-flash",
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
@@ -90,9 +90,9 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                     )
                     ai_response = response.text
                 except Exception as e2:
-                    st.error(f"Habaye ikosa ku ma models yombi: {str(e2)}")
+                    st.error(f"Habaye ikosa: {str(e2)}")
 
-            # Niba igisubizo kiyikiriwe, kigaragaze
+            # Kugaragaza igisubizo niba kiyikiriwe
             if ai_response:
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
