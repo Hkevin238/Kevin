@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Page setup
-st.set_page_config(page_title="Universal AI Assistant", page_icon="newone.png", layout="centered")
+st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
 # Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo bwa Base64 ku background no kuri avatar
 def get_base64_of_bin_file(bin_file):
@@ -28,55 +28,30 @@ else:
     img_html = '<span style="font-size: 32px;">🤖</span>'
     bg_img_css = 'none'
 
-# Custom CSS: Ifoto ya Background ihagaze pfe (Static), amabara y'umukororobya niyo ahinduka gake gake
+# Custom CSS: Custom Dynamic Rainbow Animation + Background Image + Animated Title Header
 custom_css = f"""
 <style>
-/* Background ya page yose: Ifoto iri hamwe itanyeganyega */
+/* Rainbow Animation + Background Image (newone.png) iri mu nzira ya Base64 */
 .stApp {{
-    background-image: {bg_img_css};
+    background: linear-gradient(124deg, rgba(255,0,0,0.18), rgba(255,154,0,0.18), rgba(208,222,33,0.18), rgba(79,220,74,0.18), rgba(63,218,216,0.18), rgba(47,201,226,0.18), rgba(28,127,238,0.18), rgba(95,21,242,0.18), rgba(186,12,248,0.18)),
+                {bg_img_css} no-repeat center center fixed;
     background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    position: relative;
+    background-blend-mode: overlay;
+    animation: rainbow 20s ease infinite;
 }}
 
-/* Rainbow Layer: Color shift ku mabara gusa, utanyeganyeza ifoto */
-.stApp::before {{
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: linear-gradient(135deg, 
-        rgba(255, 0, 0, 0.2), 
-        rgba(255, 165, 0, 0.2), 
-        rgba(255, 255, 0, 0.2), 
-        rgba(0, 128, 0, 0.2), 
-        rgba(0, 0, 255, 0.2), 
-        rgba(75, 0, 130, 0.2), 
-        rgba(238, 130, 238, 0.2));
-    background-size: 400% 400%;
-    animation: rainbowShift 16s ease infinite;
-    pointer-events: none;
-    z-index: 0;
+@keyframes rainbow {{ 
+    0%{{background-position:0% 82%}}
+    50%{{background-position:100% 19%}}
+    100%{{background-position:0% 82%}}
 }}
 
-@keyframes rainbowShift {{
-    0% {{ background-position: 0% 50%; }}
-    50% {{ background-position: 100% 50%; }}
-    100% {{ background-position: 0% 50%; }}
-}}
-
-/* Chat Container Card semi-transparent styling */
+/* Chat Container Card semi-transparent styling yo kugaragaza text neza ku background */
 .stChatMessage {{
     background-color: rgba(20, 22, 30, 0.88) !important;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
-    position: relative;
-    z-index: 1;
 }}
 
 /* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
@@ -86,8 +61,6 @@ custom_css = f"""
     gap: 12px;
     animation: floatUpDown 3.8s ease-in-out infinite;
     margin-bottom: 5px;
-    position: relative;
-    z-index: 1;
 }}
 
 .title-avatar {{
@@ -126,11 +99,11 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown(f'''
 <div class="title-container">
     {img_html}
-    <h1 class="floating-title">Universal AI Assistant</h1>
+    <h1 class="floating-title">Universal AI Assistant (Groq)</h1>
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("WELCOME ON Universal AI Assistant !.")
+st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
 load_dotenv()
@@ -185,7 +158,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Ask anything...."):
+if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -198,7 +171,7 @@ if prompt := st.chat_input("Ask anything...."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("Universal AI thinking...."):
+        with st.spinner("AI iriko iratekereza..."):
             ai_response = None
             last_error = None
             
