@@ -1,24 +1,37 @@
+import os
 import streamlit as st
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
 # Page setup
-st.set_page_config(page_title="Kevin AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
 st.title("🤖 Universal AI Assistant")
-st.caption("Universal AI built for you ! Welcome.")
+st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
-# Secure API Key retrieval
-api_key = st.secrets.get("GEMINI_API_KEY")
+# Load local environment variables (.env file niba ihari)
+load_dotenv()
 
-if not api_key:
-    st.error("Ntabwo API Key yabonetse. Baza umuyobozi cyangwa uyishyire muri Streamlit Secrets.")
+# Gushaka API Key muri Streamlit Secrets cyangwa muri Environment Variables (.env)
+raw_api_key = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+
+if not raw_api_key:
+    st.error("⚠️ GEMINI_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
-# Initialize Gemini Client
-client = genai.Client(api_key=api_key)
+# Gukora clean kuri Key no kuyiseta muri environment variable
+api_key = str(raw_api_key).strip()
+os.environ["GEMINI_API_KEY"] = api_key
 
-# System Instructions to ensure high-quality multilingual and Kinyarwanda capability
+# Initialize Gemini Client ukoresheje API key ikosoye
+try:
+    client = genai.Client(api_key=api_key)
+except Exception as e:
+    st.error(f"Ikosa mu gutangiza Gemini Client: {str(e)}")
+    st.stop()
+
+# System Instruction yo gufasha AI kuvuga neza Ikinyarwanda n'izindi ndimi
 system_instruction = """
 You are a highly capable, multilingual AI assistant. 
 You excel at understanding and generating natural, fluent, and grammatically precise text in all human languages.
@@ -26,34 +39,34 @@ When responding in Kinyarwanda, use proper grammar, authentic phrasing, and clea
 Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
-# Initialize Chat History
+# Initialize Chat History muri Session State
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display previous messages
+# Kugaragaza ubutumwa bwose bwashize mu kiganiro
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# User Input
+# Agasanduku k'umukoresha (User Input)
 if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
-    # Append User Message
+    # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Prepare chat context for Gemini
+    # Gutegura ubutumwa bwose (Context) bwo yoherereza Gemini
     contents = []
     for msg in st.session_state.messages:
         role = "user" if msg["role"] == "user" else "model"
         contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
 
-    # Generate Response from Gemini 2.5 Flash
+    # Gushaka igisubizo kivuye kuri Gemini 1.5 Flash
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             try:
                 response = client.models.generate_content(
-                   model="gemini-1.5-flash",
+                    model="gemini-1.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
