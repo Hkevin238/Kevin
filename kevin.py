@@ -57,7 +57,7 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # Title nshya ikoresha floatUpDown animation
-st.markdown('<h1 class="floating-title">🤖 Universal AI Assistant (Groq)</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="floating-title"><img scr="newone.png">Universal AI Assistant | Made for you !</h1>', unsafe_allow_html=True)
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
