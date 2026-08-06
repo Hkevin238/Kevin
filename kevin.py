@@ -8,44 +8,75 @@ from groq import Groq
 # Page setup
 st.set_page_config(page_title="Kevin Universal AI", page_icon="newone.png", layout="centered")
 
-# Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo buze neza muri HTML CSS
+# Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo bwa Base64 ku background no kuri avatar
 def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except Exception:
+        return None
 
 ASSISTANT_AVATAR = "newone.png"
+img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
 
-# Encoding ifoto niba ihari
-try:
-    img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
+# Encoding HTML y'ifoto iri muri Title hejuru
+if img_base64:
     img_html = f'<img src="data:image/png;base64,{img_base64}" class="title-avatar">'
-except Exception:
+    bg_img_css = f'url("data:image/png;base64,{img_base64}")'
+else:
     img_html = '<span style="font-size: 32px;">🤖</span>'
+    bg_img_css = 'none'
 
-# Custom CSS yo guhindura Avatar, Rainbow Background, Background Image, na Floating Title Header
+# Custom CSS: Background Image ihagaze pfe (Static) + Rainbow Color Shift
 custom_css = f"""
 <style>
-/* Rainbow Animation + Background Image ku page yose */
+/* Background ya page yose: Ifoto iri hamwe itanyeganyega */
 .stApp {{
-    background: linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,154,0,0.15), rgba(208,222,33,0.15), rgba(79,220,74,0.15), rgba(63,218,216,0.15), rgba(47,201,226,0.15), rgba(28,127,238,0.15), rgba(95,21,242,0.15), rgba(186,12,248,0.15)),
-                url("app/static/newone.png") no-repeat center center fixed;
+    background-image: {bg_img_css};
     background-size: cover;
-    background-blend-mode: overlay;
-    animation: rainbow 18s ease infinite;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
 }}
 
-@keyframes rainbow {{ 
-    0%{{background-position:0% 82%}}
-    50%{{background-position:100% 19%}}
-    100%{{background-position:0% 82%}}
+/* Rainbow Layer: Color shift ku mabara gusa, utanyeganyeza ifoto */
+.stApp::before {{
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, 
+        rgba(255, 0, 0, 0.2), 
+        rgba(255, 165, 0, 0.2), 
+        rgba(255, 255, 0, 0.2), 
+        rgba(0, 128, 0, 0.2), 
+        rgba(0, 0, 255, 0.2), 
+        rgba(75, 0, 130, 0.2), 
+        rgba(238, 130, 238, 0.2));
+    background-size: 400% 400%;
+    animation: rainbowShift 16s ease infinite;
+    pointer-events: none;
+    z-index: 0;
 }}
 
-/* Chat Container Card semi-transparent styling yo kugaragaza text neza */
+@keyframes rainbowShift {{
+    0% {{ background-position: 0% 50%; }}
+    50% {{ background-position: 100% 50%; }}
+    100% {{ background-position: 0% 50%; }}
+}}
+
+/* Chat Container Card semi-transparent styling */
 .stChatMessage {{
-    background-color: rgba(26, 28, 36, 0.85) !important;
+    background-color: rgba(20, 22, 30, 0.88) !important;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 1;
 }}
 
 /* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
@@ -53,17 +84,19 @@ custom_css = f"""
     display: flex;
     align-items: center;
     gap: 12px;
-    animation: floatUpDown 3.5s ease-in-out infinite;
+    animation: floatUpDown 3.8s ease-in-out infinite;
     margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
 }}
 
 .title-avatar {{
-    width: 45px;
-    height: 45px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0px 0px 12px rgba(255, 255, 255, 0.4);
 }}
 
 .floating-title {{
@@ -71,7 +104,7 @@ custom_css = f"""
     font-weight: bold;
     color: #ffffff;
     margin: 0;
-    text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.6);
 }}
 
 @keyframes floatUpDown {{
@@ -79,7 +112,7 @@ custom_css = f"""
         transform: translateY(0px);
     }}
     50% {{
-        transform: translateY(-10px);
+        transform: translateY(-8px);
     }}
     100% {{
         transform: translateY(0px);
@@ -165,7 +198,7 @@ if prompt := st.chat_input("Ask anything..."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("Kevin Universal thinking...."):
+        with st.spinner("Kevin AI thinking......."):
             ai_response = None
             last_error = None
             
