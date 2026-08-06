@@ -1,4 +1,5 @@
 import os
+import time
 import streamlit as st
 from dotenv import load_dotenv
 from google import genai
@@ -39,6 +40,14 @@ When responding in Kinyarwanda, use proper grammar, authentic phrasing, and clea
 Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
+# List y'amamenyo ya models mu buryo bw'icyiciro (Fallback Order)
+AVAILABLE_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-pro"
+]
+
 # Initialize Chat History muri Session State
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -65,23 +74,13 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             ai_response = None
+            last_error = None
             
-            # Gerageza gemini-2.5-flash mbere
-            try:
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=0.7,
-                    )
-                )
-                ai_response = response.text
-            except Exception as e1:
-                # Niba igize ikibazo, gerageza gemini-2.0-flash
+            # Subiramo buri model kugeza imwe ikoze
+            for model_name in AVAILABLE_MODELS:
                 try:
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model=model_name,
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
@@ -89,10 +88,18 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                         )
                     )
                     ai_response = response.text
-                except Exception as e2:
-                    st.error(f"Habaye ikosa: {str(e2)}")
+                    if ai_response:
+                        break # Ikoze! Sohinga muri loop
+                except Exception as e:
+                    last_error = str(e)
+                    # Niba ari 429 (Resource Exhausted), tegereza amasegonda 2 mbere yo kujya ku yindi model
+                    if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                        time.sleep(2)
+                    continue
 
             # Kugaragaza igisubizo niba kiyikiriwe
             if ai_response:
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            else:
+                st.error("⚠️ Free Tier Quota yose yashize ku ma models yose, cyangwa API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key mu ma Secrets.")
