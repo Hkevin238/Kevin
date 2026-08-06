@@ -20,11 +20,11 @@ if not raw_api_key:
     st.error("⚠️ GEMINI_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
-# Gukora clean kuri Key no kuyiseta muri environment variable
+# Clean key String
 api_key = str(raw_api_key).strip()
 os.environ["GEMINI_API_KEY"] = api_key
 
-# Initialize Gemini Client ukoresheje API key ikosoye
+# Initialize Gemini Client
 try:
     client = genai.Client(api_key=api_key)
 except Exception as e:
@@ -55,18 +55,19 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gutegura ubutumwa bwose (Context) bwo yoherereza Gemini
+    # Gutegura context yo yoherereza Gemini
     contents = []
     for msg in st.session_state.messages:
         role = "user" if msg["role"] == "user" else "model"
         contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
 
-    # Gushaka igisubizo kivuye kuri Gemini 1.5 Flash
+    # Gushaka igisubizo kivuye kuri Gemini
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             try:
+                # Gukoresha model y'umwimerere yakiriwe muri google-genai SDK
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
