@@ -158,7 +158,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
+if prompt := st.chat_input("Ask anything...."):
     # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -171,7 +171,7 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("AI iriko iratekereza..."):
+        with st.spinner("Universal AI thinking...."):
             ai_response = None
             last_error = None
             
