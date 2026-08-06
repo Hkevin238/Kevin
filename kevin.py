@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Page setup
-st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Kevin Universal AI", page_icon="newone.png", layout="centered")
 
 # Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo buze neza muri HTML CSS
 def get_base64_of_bin_file(bin_file):
@@ -93,11 +93,11 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown(f'''
 <div class="title-container">
     {img_html}
-    <h1 class="floating-title">Universal AI Assistant (Groq)</h1>
+    <h1 class="floating-title">Universal AI Assistant</h1>
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
+st.caption("This Kevin Universal AI made for you !.")
 
 # Load local environment variables (.env file niba ihari)
 load_dotenv()
@@ -152,7 +152,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
+if prompt := st.chat_input("Ask anything..."):
     # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -165,7 +165,7 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("AI iriko iratekereza..."):
+        with st.spinner("Kevin Universal thinking...."):
             ai_response = None
             last_error = None
             
