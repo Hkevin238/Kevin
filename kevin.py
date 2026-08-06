@@ -99,7 +99,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown(f'''
 <div class="title-container">
     {img_html}
-    <h1 class="floating-title">Universal AI Assistant (Groq)</h1>
+    <h1 class="floating-title">Universal AI Assistant</h1>
 </div>
 ''', unsafe_allow_html=True)
 
