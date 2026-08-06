@@ -7,6 +7,34 @@ from groq import Groq
 # Page setup
 st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
+# Custom CSS yo guhindura Avatar, Rainbow Background, no gushyiramo Background Image
+custom_css = """
+<style>
+/* Rainbow Animation + Background Image ku page yose */
+.stApp {
+    background: linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,154,0,0.15), rgba(208,222,33,0.15), rgba(79,220,74,0.15), rgba(63,218,216,0.15), rgba(47,201,226,0.15), rgba(28,127,238,0.15), rgba(95,21,242,0.15), rgba(186,12,248,0.15)),
+                url("app/static/newone.png") no-repeat center center fixed;
+    background-size: cover;
+    background-blend-mode: overlay;
+    animation: rainbow 18s ease infinite;
+}
+
+@keyframes rainbow { 
+    0%{background-position:0% 82%}
+    50%{background-position:100% 19%}
+    100%{background-position:0% 82%}
+}
+
+/* Chat Container Card semi-transparent styling yo kugaragaza vizibure neza */
+.stChatMessage {
+    background-color: rgba(26, 28, 36, 0.85) !important;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
 st.title("🤖 Universal AI Assistant (Groq)")
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
@@ -30,7 +58,7 @@ except Exception as e:
     st.error(f"Ikosa mu gutangiza Groq Client: {str(e)}")
     st.stop()
 
-# System Instruction irimo amabwiriza y'umwimerere w'uwayikoze (Developer Identity)
+# System Instruction
 system_instruction = """
 You are a highly capable, multilingual AI assistant created and developed by Developer Kevin. 
 
@@ -45,20 +73,24 @@ LANGUAGE AND TONE INSTRUCTIONS:
 - Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
-# List y'amamenyo ya models za Groq mu buryo bw'icyiciro (Fallback Order)
+# List y'amamenyo ya models za Groq
 AVAILABLE_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
     "mixtral-8x7b-32768"
 ]
 
-# Initialize Chat History muri Session State
+# Path y'ifoto nshya ya Assistant Avatar
+ASSISTANT_AVATAR = "newone.png"
+
+# Initialize Chat History
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Kugaragaza ubutumwa bwose bwashize mu kiganiro
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar_to_use = ASSISTANT_AVATAR if message["role"] == "assistant" else None
+    with st.chat_message(message["role"], avatar=avatar_to_use):
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
@@ -68,18 +100,17 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gutegura ubutumwa bwose buyoborwa na Groq (harimo na system instruction)
+    # Gutegura ubutumwa buyoborwa na Groq
     groq_messages = [{"role": "system", "content": system_instruction}]
     for msg in st.session_state.messages:
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Gushaka igisubizo kivuye kuri Groq
-    with st.chat_message("assistant"):
+    # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
+    with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
         with st.spinner("AI iriko iratekereza..."):
             ai_response = None
             last_error = None
             
-            # Subiramo buri model kugeza imwe ikoze
             for model_name in AVAILABLE_MODELS:
                 try:
                     response = client.chat.completions.create(
@@ -89,15 +120,13 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                     )
                     ai_response = response.choices[0].message.content
                     if ai_response:
-                        break # Ikoze! Sohinga muri loop
+                        break
                 except Exception as e:
                     last_error = str(e)
-                    # Niba ari Rate Limit error (429), tegereza amasegonda 2 mbere yo kujya ku yindi model
                     if "429" in str(e) or "rate_limit" in str(e).lower():
                         time.sleep(2)
                     continue
 
-            # Kugaragaza igisubizo niba kiyikiriwe
             if ai_response:
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
