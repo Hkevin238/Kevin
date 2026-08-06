@@ -61,13 +61,12 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
         role = "user" if msg["role"] == "user" else "model"
         contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
 
-    # Gushaka igisubizo kivuye kuri Gemini
+    # Gushaka igisubizo kivuye kuri Gemini (gemini-2.5-flash)
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             try:
-                # Gukoresha gemini-2.0-flash model ihari kandi yihuta
                 response = client.models.generate_content(
-                    model="gemini-2.0-flash",
+                    model="gemini-2.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
