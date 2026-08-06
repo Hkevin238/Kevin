@@ -2,34 +2,32 @@ import os
 import time
 import streamlit as st
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from groq import Groq
 
 # Page setup
 st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
-st.title("🤖 Universal AI Assistant")
+st.title("🤖 Universal AI Assistant (Groq)")
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
 load_dotenv()
 
-# Gushaka API Key muri Streamlit Secrets cyangwa muri Environment Variables (.env)
-raw_api_key = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+# Gushaka Groq API Key muri Streamlit Secrets cyangwa muri Environment Variables (.env)
+raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
-    st.error("⚠️ GEMINI_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
+    st.error("⚠️ GROQ_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
 # Clean key String
 api_key = str(raw_api_key).strip()
-os.environ["GEMINI_API_KEY"] = api_key
 
-# Initialize Gemini Client
+# Initialize Groq Client
 try:
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
 except Exception as e:
-    st.error(f"Ikosa mu gutangiza Gemini Client: {str(e)}")
+    st.error(f"Ikosa mu gutangiza Groq Client: {str(e)}")
     st.stop()
 
 # System Instruction yo gufasha AI kuvuga neza Ikinyarwanda n'izindi ndimi
@@ -40,12 +38,11 @@ When responding in Kinyarwanda, use proper grammar, authentic phrasing, and clea
 Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
-# List y'amamenyo ya models mu buryo bw'icyiciro (Fallback Order)
+# List y'amamenyo ya models za Groq mu buryo bw'icyiciro (Fallback Order)
 AVAILABLE_MODELS = [
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-1.5-pro"
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "mixtral-8x7b-32768"
 ]
 
 # Initialize Chat History muri Session State
@@ -64,13 +61,12 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gutegura context yo yoherereza Gemini
-    contents = []
+    # Gutegura ubutumwa bwose buyoborwa na Groq (harimo na system instruction)
+    groq_messages = [{"role": "system", "content": system_instruction}]
     for msg in st.session_state.messages:
-        role = "user" if msg["role"] == "user" else "model"
-        contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
+        groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Gushaka igisubizo kivuye kuri Gemini
+    # Gushaka igisubizo kivuye kuri Groq
     with st.chat_message("assistant"):
         with st.spinner("AI iriko iratekereza..."):
             ai_response = None
@@ -79,21 +75,18 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
             # Subiramo buri model kugeza imwe ikoze
             for model_name in AVAILABLE_MODELS:
                 try:
-                    response = client.models.generate_content(
+                    response = client.chat.completions.create(
                         model=model_name,
-                        contents=contents,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                            temperature=0.7,
-                        )
+                        messages=groq_messages,
+                        temperature=0.7,
                     )
-                    ai_response = response.text
+                    ai_response = response.choices[0].message.content
                     if ai_response:
                         break # Ikoze! Sohinga muri loop
                 except Exception as e:
                     last_error = str(e)
-                    # Niba ari 429 (Resource Exhausted), tegereza amasegonda 2 mbere yo kujya ku yindi model
-                    if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                    # Niba ari Rate Limit error (429), tegereza amasegonda 2 mbere yo kujya ku yindi model
+                    if "429" in str(e) or "rate_limit" in str(e).lower():
                         time.sleep(2)
                     continue
 
@@ -102,4 +95,4 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
             else:
-                st.error("⚠️ Free Tier Quota yose yashize ku ma models yose, cyangwa API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key mu ma Secrets.")
+                st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
