@@ -103,7 +103,7 @@ st.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
+st.caption("WELCOME ON Universal AI Assistant !.")
 
 # Load local environment variables (.env file niba ihari)
 load_dotenv()
