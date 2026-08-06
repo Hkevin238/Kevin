@@ -7,7 +7,7 @@ from groq import Groq
 # Page setup
 st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
-# Custom CSS yo guhindura Avatar, Rainbow Background, no gushyiramo Background Image
+# Custom CSS yo guhindura Avatar, Rainbow Background, Background Image, na Floating Title Animation
 custom_css = """
 <style>
 /* Rainbow Animation + Background Image ku page yose */
@@ -25,17 +25,39 @@ custom_css = """
     100%{background-position:0% 82%}
 }
 
-/* Chat Container Card semi-transparent styling yo kugaragaza vizibure neza */
+/* Chat Container Card semi-transparent styling yo kugaragaza text neza */
 .stChatMessage {
     background-color: rgba(26, 28, 36, 0.85) !important;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Floating Title Animation (Move Up & Down gake gake) */
+.floating-title {
+    display: inline-block;
+    animation: floatUpDown 3.5s ease-in-out infinite;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes floatUpDown {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-st.title("🤖 Universal AI Assistant (Groq)")
+# Title nshya ikoresha floatUpDown animation
+st.markdown('<h1 class="floating-title">🤖 Universal AI Assistant (Groq)</h1>', unsafe_allow_html=True)
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
