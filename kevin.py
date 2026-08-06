@@ -1,5 +1,6 @@
 import os
 import time
+import base64
 import streamlit as st
 from dotenv import load_dotenv
 from groq import Groq
@@ -7,57 +8,101 @@ from groq import Groq
 # Page setup
 st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
 
-# Custom CSS yo guhindura Avatar, Rainbow Background, Background Image, na Floating Title Animation
-custom_css = """
+# Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo bwa Base64 ku background no kuri avatar
+def get_base64_of_bin_file(bin_file):
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except Exception:
+        return None
+
+ASSISTANT_AVATAR = "newone.png"
+img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
+
+# Encoding HTML y'ifoto iri muri Title hejuru
+if img_base64:
+    img_html = f'<img src="data:image/png;base64,{img_base64}" class="title-avatar">'
+    bg_img_css = f'url("data:image/png;base64,{img_base64}")'
+else:
+    img_html = '<span style="font-size: 32px;">🤖</span>'
+    bg_img_css = 'none'
+
+# Custom CSS: Custom Dynamic Rainbow Animation + Background Image + Animated Title Header
+custom_css = f"""
 <style>
-/* Rainbow Animation + Background Image ku page yose */
-.stApp {
-    background: linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,154,0,0.15), rgba(208,222,33,0.15), rgba(79,220,74,0.15), rgba(63,218,216,0.15), rgba(47,201,226,0.15), rgba(28,127,238,0.15), rgba(95,21,242,0.15), rgba(186,12,248,0.15)),
-                url("app/static/newone.png") no-repeat center center fixed;
+/* Rainbow Animation + Background Image (newone.png) iri mu nzira ya Base64 */
+.stApp {{
+    background: linear-gradient(124deg, rgba(255,0,0,0.18), rgba(255,154,0,0.18), rgba(208,222,33,0.18), rgba(79,220,74,0.18), rgba(63,218,216,0.18), rgba(47,201,226,0.18), rgba(28,127,238,0.18), rgba(95,21,242,0.18), rgba(186,12,248,0.18)),
+                {bg_img_css} no-repeat center center fixed;
     background-size: cover;
     background-blend-mode: overlay;
-    animation: rainbow 18s ease infinite;
-}
+    animation: rainbow 20s ease infinite;
+}}
 
-@keyframes rainbow { 
-    0%{background-position:0% 82%}
-    50%{background-position:100% 19%}
-    100%{background-position:0% 82%}
-}
+@keyframes rainbow {{ 
+    0%{{background-position:0% 82%}}
+    50%{{background-position:100% 19%}}
+    100%{{background-position:0% 82%}}
+}}
 
-/* Chat Container Card semi-transparent styling yo kugaragaza text neza */
-.stChatMessage {
-    background-color: rgba(26, 28, 36, 0.85) !important;
+/* Chat Container Card semi-transparent styling yo kugaragaza text neza ku background */
+.stChatMessage {{
+    background-color: rgba(20, 22, 30, 0.88) !important;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+}}
 
-/* Floating Title Animation (Move Up & Down gake gake) */
-.floating-title {
-    display: inline-block;
-    animation: floatUpDown 3.5s ease-in-out infinite;
+/* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
+.title-container {{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: floatUpDown 3.8s ease-in-out infinite;
+    margin-bottom: 5px;
+}}
+
+.title-avatar {{
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0px 0px 12px rgba(255, 255, 255, 0.4);
+}}
+
+.floating-title {{
+    font-size: 2.2rem;
     font-weight: bold;
     color: #ffffff;
-    text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-}
+    margin: 0;
+    text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.6);
+}}
 
-@keyframes floatUpDown {
-    0% {
+@keyframes floatUpDown {{
+    0% {{
         transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-    100% {
+    }}
+    50% {{
+        transform: translateY(-8px);
+    }}
+    100% {{
         transform: translateY(0px);
-    }
-}
+    }}
+}}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Title nshya ikoresha floatUpDown animation
-st.markdown('<h1 class="floating-title">Universal AI Assistant | Made for you </h1>', unsafe_allow_html=True)
+# Header irimo ifoto ya newone.png n'inyandiko ya Title izamuka ikazaza
+st.markdown(f'''
+<div class="title-container">
+    {img_html}
+    <h1 class="floating-title">Universal AI Assistant (Groq)</h1>
+</div>
+''', unsafe_allow_html=True)
+
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
@@ -67,7 +112,7 @@ load_dotenv()
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
-    st.error("⚠️ GROQ_API_KEY doesn't occurred! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
+    st.error("⚠️ GROQ_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
 # Clean key String
@@ -102,9 +147,6 @@ AVAILABLE_MODELS = [
     "mixtral-8x7b-32768"
 ]
 
-# Path y'ifoto nshya ya Assistant Avatar
-ASSISTANT_AVATAR = "newone.png"
-
 # Initialize Chat History
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -116,7 +158,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Ask anything...."):
+if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
     # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -129,7 +171,7 @@ if prompt := st.chat_input("Ask anything...."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("Universal AI thinking....."):
+        with st.spinner("AI iriko iratekereza..."):
             ai_response = None
             last_error = None
             
@@ -153,4 +195,4 @@ if prompt := st.chat_input("Ask anything...."):
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
             else:
-                st.error("⚠️ Rate limit was reached on all models or Groq API key have a problem. Please wait 1min or try again or change an API key.")
+                st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
