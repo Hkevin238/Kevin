@@ -3,10 +3,10 @@ from google import genai
 from google.genai import types
 
 # Page setup
-st.set_page_config(page_title="Multilingual AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Kevin AI Assistant", page_icon="🤖", layout="centered")
 
 st.title("🤖 Universal AI Assistant")
-st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
+st.caption("Universal AI built for you ! Welcome.")
 
 # Secure API Key retrieval
 api_key = st.secrets.get("GEMINI_API_KEY")
