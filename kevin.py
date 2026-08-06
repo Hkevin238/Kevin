@@ -28,30 +28,55 @@ else:
     img_html = '<span style="font-size: 32px;">🤖</span>'
     bg_img_css = 'none'
 
-# Custom CSS: Custom Dynamic Rainbow Animation + Background Image + Animated Title Header
+# Custom CSS: Ifoto ya Background ihagaze pfe (Static), amabara y'umukororobya niyo ahinduka gake gake
 custom_css = f"""
 <style>
-/* Rainbow Animation + Background Image (newone.png) iri mu nzira ya Base64 */
+/* Background ya page yose: Ifoto iri hamwe itanyeganyega */
 .stApp {{
-    background: linear-gradient(124deg, rgba(255,0,0,0.18), rgba(255,154,0,0.18), rgba(208,222,33,0.18), rgba(79,220,74,0.18), rgba(63,218,216,0.18), rgba(47,201,226,0.18), rgba(28,127,238,0.18), rgba(95,21,242,0.18), rgba(186,12,248,0.18)),
-                {bg_img_css} no-repeat center center fixed;
+    background-image: {bg_img_css};
     background-size: cover;
-    background-blend-mode: overlay;
-    animation: rainbow 20s ease infinite;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
 }}
 
-@keyframes rainbow {{ 
-    0%{{background-position:0% 82%}}
-    50%{{background-position:100% 19%}}
-    100%{{background-position:0% 82%}}
+/* Rainbow Layer: Color shift ku mabara gusa, utanyeganyeza ifoto */
+.stApp::before {{
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, 
+        rgba(255, 0, 0, 0.2), 
+        rgba(255, 165, 0, 0.2), 
+        rgba(255, 255, 0, 0.2), 
+        rgba(0, 128, 0, 0.2), 
+        rgba(0, 0, 255, 0.2), 
+        rgba(75, 0, 130, 0.2), 
+        rgba(238, 130, 238, 0.2));
+    background-size: 400% 400%;
+    animation: rainbowShift 16s ease infinite;
+    pointer-events: none;
+    z-index: 0;
 }}
 
-/* Chat Container Card semi-transparent styling yo kugaragaza text neza ku background */
+@keyframes rainbowShift {{
+    0% {{ background-position: 0% 50%; }}
+    50% {{ background-position: 100% 50%; }}
+    100% {{ background-position: 0% 50%; }}
+}}
+
+/* Chat Container Card semi-transparent styling */
 .stChatMessage {{
     background-color: rgba(20, 22, 30, 0.88) !important;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 1;
 }}
 
 /* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
@@ -61,6 +86,8 @@ custom_css = f"""
     gap: 12px;
     animation: floatUpDown 3.8s ease-in-out infinite;
     margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
 }}
 
 .title-avatar {{
