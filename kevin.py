@@ -57,7 +57,7 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # Title nshya ikoresha floatUpDown animation
-st.markdown('<h1 class="floating-title"><img scr="newone.png">Universal AI Assistant | Made for you !</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="floating-title">Universal AI Assistant | Made for you </h1>', unsafe_allow_html=True)
 st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
 
 # Load local environment variables (.env file niba ihari)
@@ -67,7 +67,7 @@ load_dotenv()
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
-    st.error("⚠️ GROQ_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
+    st.error("⚠️ GROQ_API_KEY doesn't occurred! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
 # Clean key String
@@ -116,7 +116,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
+if prompt := st.chat_input("Ask anything...."):
     # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -129,7 +129,7 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
 
     # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("AI iriko iratekereza..."):
+        with st.spinner("Universal AI thinking....."):
             ai_response = None
             last_error = None
             
@@ -153,4 +153,4 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                 st.markdown(ai_response)
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
             else:
-                st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
+                st.error("⚠️ Rate limit was reached on all models or Groq API key have a problem. Please wait 1min or try again or change an API key.")
