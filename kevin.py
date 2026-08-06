@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Page setup
-st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Universal AI Assistant", page_icon="newone.png", layout="centered")
 
-# Function yo kwinjiza ifoto mu buryo bwa Base64
+# Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo bwa Base64 ku background no kuri avatar
 def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
@@ -20,6 +20,7 @@ def get_base64_of_bin_file(bin_file):
 ASSISTANT_AVATAR = "newone.png"
 img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
 
+# Encoding HTML y'ifoto iri muri Title hejuru
 if img_base64:
     img_html = f'<img src="data:image/png;base64,{img_base64}" class="title-avatar">'
     bg_img_css = f'url("data:image/png;base64,{img_base64}")'
@@ -27,10 +28,10 @@ else:
     img_html = '<span style="font-size: 32px;">🤖</span>'
     bg_img_css = 'none'
 
-# Custom CSS
+# Custom CSS: Ifoto ya Background ihagaze pfe (Static), amabara y'umukororobya niyo ahinduka gake gake
 custom_css = f"""
 <style>
-/* Background ya page yose: Ifoto irahagaze (static), amabara y'umukororobya niyo ahinduka gake gake */
+/* Background ya page yose: Ifoto iri hamwe itanyeganyega */
 .stApp {{
     background-image: {bg_img_css};
     background-size: cover;
@@ -40,7 +41,7 @@ custom_css = f"""
     position: relative;
 }}
 
-/* Color overlay ikora animation y'amabara y'umukororobya utanyeganyeza ifoto */
+/* Rainbow Layer: Color shift ku mabara gusa, utanyeganyeza ifoto */
 .stApp::before {{
     content: "";
     position: fixed;
@@ -49,15 +50,15 @@ custom_css = f"""
     width: 100vw;
     height: 100vh;
     background: linear-gradient(135deg, 
-        rgba(255, 0, 0, 0.25), 
-        rgba(255, 165, 0, 0.25), 
-        rgba(255, 255, 0, 0.25), 
-        rgba(0, 128, 0, 0.25), 
-        rgba(0, 0, 255, 0.25), 
-        rgba(75, 0, 130, 0.25), 
-        rgba(238, 130, 238, 0.25));
+        rgba(255, 0, 0, 0.2), 
+        rgba(255, 165, 0, 0.2), 
+        rgba(255, 255, 0, 0.2), 
+        rgba(0, 128, 0, 0.2), 
+        rgba(0, 0, 255, 0.2), 
+        rgba(75, 0, 130, 0.2), 
+        rgba(238, 130, 238, 0.2));
     background-size: 400% 400%;
-    animation: rainbowShift 15s ease infinite;
+    animation: rainbowShift 16s ease infinite;
     pointer-events: none;
     z-index: 0;
 }}
@@ -68,45 +69,7 @@ custom_css = f"""
     100% {{ background-position: 0% 50%; }}
 }}
 
-/* Sticky Header y'Ishoza mu birango: Title n'ifoto zihora zigaragara hejuru umu user ascrolla */
-.sticky-header {{
-    position: sticky;
-    top: 3.5rem;
-    z-index: 999;
-    background: rgba(15, 17, 23, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 12px 18px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    margin-bottom: 20px;
-    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.4);
-}}
-
-.title-container {{
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}}
-
-.title-avatar {{
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
-}}
-
-.sticky-title {{
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #ffffff;
-    margin: 0;
-    text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.7);
-}}
-
-/* Chat Container Card styling */
+/* Chat Container Card semi-transparent styling */
 .stChatMessage {{
     background-color: rgba(20, 22, 30, 0.88) !important;
     border-radius: 12px;
@@ -115,32 +78,71 @@ custom_css = f"""
     position: relative;
     z-index: 1;
 }}
+
+/* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
+.title-container {{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: floatUpDown 3.8s ease-in-out infinite;
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
+}}
+
+.title-avatar {{
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0px 0px 12px rgba(255, 255, 255, 0.4);
+}}
+
+.floating-title {{
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.6);
+}}
+
+@keyframes floatUpDown {{
+    0% {{
+        transform: translateY(0px);
+    }}
+    50% {{
+        transform: translateY(-8px);
+    }}
+    100% {{
+        transform: translateY(0px);
+    }}
+}}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Sticky Title Header ikomeza kugara hejuru igihe cyose ikiganiro cyo gukoresha AI kirimo kuba
+# Header irimo ifoto ya newone.png n'inyandiko ya Title izamuka ikazaza
 st.markdown(f'''
-<div class="sticky-header">
-    <div class="title-container">
-        {img_html}
-        <h1 class="sticky-title">Universal AI Assistant (Groq)</h1>
-    </div>
+<div class="title-container">
+    {img_html}
+    <h1 class="floating-title">Universal AI Assistant</h1>
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("AI ivuga indimi zose neza, harimo n'Ikinyarwanda buserukiramuco.")
+st.caption("WELCOME ON Universal AI Assistant !.")
 
-# Load local environment variables
+# Load local environment variables (.env file niba ihari)
 load_dotenv()
 
-# Gushaka Groq API Key
+# Gushaka Groq API Key muri Streamlit Secrets cyangwa muri Environment Variables (.env)
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
     st.error("⚠️ GROQ_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
+# Clean key String
 api_key = str(raw_api_key).strip()
 
 # Initialize Groq Client
@@ -165,6 +167,7 @@ LANGUAGE AND TONE INSTRUCTIONS:
 - Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
+# List y'amamenyo ya models za Groq
 AVAILABLE_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
@@ -175,25 +178,29 @@ AVAILABLE_MODELS = [
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display prior chat messages
+# Kugaragaza ubutumwa bwose bwashize mu kiganiro
 for message in st.session_state.messages:
     avatar_to_use = ASSISTANT_AVATAR if message["role"] == "assistant" else None
     with st.chat_message(message["role"], avatar=avatar_to_use):
         st.markdown(message["content"])
 
-# User Input
-if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
+# Agasanduku k'umukoresha (User Input)
+if prompt := st.chat_input("Ask anything...."):
+    # Gushyira ubutumwa bw'umukoresha muri chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # Gutegura ubutumwa buyoborwa na Groq
     groq_messages = [{"role": "system", "content": system_instruction}]
     for msg in st.session_state.messages:
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
+    # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("AI iriko iratekereza..."):
+        with st.spinner("Universal AI thinking...."):
             ai_response = None
+            last_error = None
             
             for model_name in AVAILABLE_MODELS:
                 try:
@@ -206,6 +213,7 @@ if prompt := st.chat_input("Baza ikibazo cyangwa wandike ubutumwa..."):
                     if ai_response:
                         break
                 except Exception as e:
+                    last_error = str(e)
                     if "429" in str(e) or "rate_limit" in str(e).lower():
                         time.sleep(2)
                     continue
