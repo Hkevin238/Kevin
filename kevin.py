@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Page setup
-st.set_page_config(page_title="Universal AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Universal AI Assistant", page_icon="newone.png", layout="centered")
 
 # Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo bwa Base64 ku background no kuri avatar
 def get_base64_of_bin_file(bin_file):
