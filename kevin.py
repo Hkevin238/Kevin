@@ -5,136 +5,101 @@ import streamlit as st
 from dotenv import load_dotenv
 from groq import Groq
 
-# Page setup
-st.set_page_config(page_title="Kevin Universal AI", page_icon="newone.png", layout="centered")
+# Page setup - wide layout yo guha umwanya uhagije interface
+st.set_page_config(
+    page_title="Kevin Universal AI", 
+    page_icon="newone.png", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Function yo guhindura ifoto mo base64
+# Function yo gukora encoding y'ifoto muri Base64
 def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except Exception:
+        return None
 
 ASSISTANT_AVATAR = "newone.png"
+img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
 
-# Encoding ifoto niba ihari
-try:
-    img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
+if img_base64:
     img_html = f'<img src="data:image/png;base64,{img_base64}" class="title-avatar">'
-except Exception:
+else:
     img_html = '<span style="font-size: 32px;">🤖</span>'
 
-# Custom CSS: Rainbow Background, Floating Header, na Chat Alignment (User Right, AI Left)
+# Custom CSS & Glassmorphism Styling
 custom_css = f"""
 <style>
-/* Rainbow Animation + Background Image ku page yose */
+/* Background hamwe n'agaciro k'amabara agezweho */
 .stApp {{
-    background: linear-gradient(124deg, rgba(255,0,0,0.15), rgba(255,154,0,0.15), rgba(208,222,33,0.15), rgba(79,220,74,0.15), rgba(63,218,216,0.15), rgba(47,201,226,0.15), rgba(28,127,238,0.15), rgba(95,21,242,0.15), rgba(186,12,248,0.15)),
+    background: linear-gradient(124deg, rgba(15, 17, 23, 0.95), rgba(26, 28, 36, 0.9)),
                 url("app/static/newone.png") no-repeat center center fixed;
     background-size: cover;
     background-blend-mode: overlay;
-    animation: rainbow 18s ease infinite;
 }}
 
-@keyframes rainbow {{ 
-    0%{{background-position:0% 82%}}
-    50%{{background-position:100% 19%}}
-    100%{{background-position:0% 82%}}
-}}
-
-/* Container yo gutunganya ubutumwa bwose */
-[data-testid="stChatMessageContent"] {{
-    border-radius: 18px !important;
-    padding: 12px 16px !important;
-    font-size: 15px !important;
-    line-height: 1.4 !important;
-}}
-
-/* Ubutumwa bwa User (Kujyana Iburyo - Right side) */
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {{
-    flex-direction: row-reverse !important;
-    text-align: right !important;
-}}
-
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {{
-    background-color: rgba(47, 47, 47, 0.9) !important;
-    color: #ffffff !important;
-    margin-left: auto !important;
-    margin-right: 0px !important;
-    border-radius: 18px 18px 4px 18px !important;
-    max-width: 80% !important;
+/* Chat Container Card (Glassmorphism Effect) */
+.stChatMessage {{
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }}
 
-/* Ubutumwa bwa AI / Assistant (Kuba Ibumoso - Left side) */
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {{
-    flex-direction: row !important;
-    text-align: left !important;
-}}
-
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {{
-    background-color: rgba(26, 28, 36, 0.85) !important;
-    color: #ffffff !important;
-    margin-right: auto !important;
-    margin-left: 0px !important;
-    border-radius: 18px 18px 18px 4px !important;
-    max-width: 85% !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}}
-
-/* Guhisha avatar y'umukoresha (User Avatar) */
-[data-testid="stChatMessageAvatarUser"] {{
-    display: none !important;
-}}
-
-/* Floating Title Animation Header */
+/* Floating Title Styling */
 .title-container {{
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     animation: floatUpDown 3.5s ease-in-out infinite;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }}
 
 .title-avatar {{
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0px 0px 15px rgba(0, 200, 255, 0.4);
 }}
 
 .floating-title {{
     font-size: 2.2rem;
-    font-weight: bold;
-    color: #ffffff;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ffffff, #8a2be2, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin: 0;
-    text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
 }}
 
 @keyframes floatUpDown {{
     0% {{ transform: translateY(0px); }}
-    50% {{ transform: translateY(-10px); }}
+    50% {{ transform: translateY(-6px); }}
     100% {{ transform: translateY(0px); }}
+}}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {{
+    width: 8px;
+}}
+::-webkit-scrollbar-thumb {{
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
 }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Header y'umutwe w'intego (Title)
-st.markdown(f'''
-<div class="title-container">
-    {img_html}
-    <h1 class="floating-title">Universal AI Assistant</h1>
-</div>
-''', unsafe_allow_html=True)
-
-st.caption("This Kevin Universal AI made for you!.")
-
-# Load local environment variables (.env)
+# Load local environment variables
 load_dotenv()
 
-# Gushaka Groq API Key
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
@@ -143,7 +108,6 @@ if not raw_api_key:
 
 api_key = str(raw_api_key).strip()
 
-# Initialize Groq Client
 try:
     client = Groq(api_key=api_key)
 except Exception as e:
@@ -175,31 +139,100 @@ AVAILABLE_MODELS = [
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Kugaragaza ubutumwa bwose bwashize mu kiganiro
+# Sidebar Navigation & Settings
+with st.sidebar:
+    st.image(ASSISTANT_AVATAR if os.path.exists(ASSISTANT_AVATAR) else "🤖", width=80)
+    st.title("Kevin AI Settings")
+    
+    # Model Selection UI
+    selected_model = st.selectbox(
+        "Hitamo AI Model:",
+        AVAILABLE_MODELS,
+        index=0
+    )
+    
+    st.divider()
+    
+    # Clear Chat Feature
+    if st.button("🗑️ Siba Ibiganiro (Clear Chat)", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+        
+    st.divider()
+    st.caption("Developer: **Developer Kevin**")
+    st.caption("Contact: therealhacks583@gmail.com")
+
+# Main Header
+st.markdown(f'''
+<div class="title-container">
+    {img_html}
+    <h1 class="floating-title">Kevin Universal AI</h1>
+</div>
+''', unsafe_allow_html=True)
+
+st.caption("Powered by Groq • Developed by Developer Kevin")
+
+# Display Messages
 for message in st.session_state.messages:
     avatar_to_use = ASSISTANT_AVATAR if message["role"] == "assistant" else None
     with st.chat_message(message["role"], avatar=avatar_to_use):
         st.markdown(message["content"])
 
-# Agasanduku k'umukoresha (User Input)
-if prompt := st.chat_input("Ask anything..."):
-    # Gushyira ubutumwa bw'umukoresha muri chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+# Quick Prompt Suggestions (Erekana gusa niba chat ikiri nshya)
+prompt_to_submit = None
+if len(st.session_state.messages) == 0:
+    st.write("💡 **Urugero rw'ibyo yabaza:**")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("🚀 Ndamutsa mu Kinyarwanda"):
+            prompt_to_submit = "Mwaramutse! Mbwira uwo uri we n'uko ushobora kumfasha."
+    with col2:
+        if st.button("💻 Nyereka urugero rwa HTML Code"):
+            prompt_to_submit = "Nyandikira urugero rwa HTML & CSS k'urupapuro rugezweho."
+    with col3:
+        if st.button("📝 Mfasha kwandika Ibaruwa"):
+            prompt_to_submit = "Mfasha kwandika ibaruwa isaba akazi mu buryo bw'umwuga."
 
-    # Gutegura ubutumwa buyoborwa na Groq
+# Chat Input
+user_input = st.chat_input("Ask anything...")
+if user_input:
+    prompt_to_submit = user_input
+
+# Logic yo kwakira ubutumwa no kuguha Streaming Response
+if prompt_to_submit:
+    st.session_state.messages.append({"role": "user", "content": prompt_to_submit})
+    with st.chat_message("user"):
+        st.markdown(prompt_to_submit)
+
     groq_messages = [{"role": "system", "content": system_instruction}]
     for msg in st.session_state.messages:
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Gushaka igisubizo kivuye kuri Groq
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.status("Kevin AI thinking.......", expanded=False) as status:
-            ai_response = None
-            last_error = None
+        # Stream response kubera UX nziza
+        try:
+            stream = client.chat.completions.create(
+                model=selected_model,
+                messages=groq_messages,
+                temperature=0.7,
+                stream=True
+            )
             
+            def generate_chunks():
+                for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+
+            ai_response = st.write_stream(generate_chunks())
+            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+
+        except Exception as e:
+            # Fallback ku yindi models niba habayeho erreur
+            st.warning(f"Model {selected_model} igize ikibazo, irimo kugeza ku yindi model...")
+            ai_response = None
             for model_name in AVAILABLE_MODELS:
+                if model_name == selected_model:
+                    continue
                 try:
                     response = client.chat.completions.create(
                         model=model_name,
@@ -208,16 +241,11 @@ if prompt := st.chat_input("Ask anything..."):
                     )
                     ai_response = response.choices[0].message.content
                     if ai_response:
-                        status.update(label="Done!", state="complete", expanded=False)
+                        st.markdown(ai_response)
+                        st.session_state.messages.append({"role": "assistant", "content": ai_response})
                         break
-                except Exception as e:
-                    last_error = str(e)
-                    if "429" in str(e) or "rate_limit" in str(e).lower():
-                        time.sleep(2)
+                except Exception:
                     continue
 
-        if ai_response:
-            st.markdown(ai_response)
-            st.session_state.messages.append({"role": "assistant", "content": ai_response})
-        else:
-            st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
+            if not ai_response:
+                st.error("⚠️ Rate limit yashize ku ma models yose. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
