@@ -5,15 +5,15 @@ import streamlit as st
 from dotenv import load_dotenv
 from groq import Groq
 
-# Page setup - Key Viewport nka ChatGPT
+# Page setup - Centered & Mobile Style View
 st.set_page_config(
-    page_title="Kevin Universal AI", 
-    page_icon="newone.png", 
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="ChatGPT", 
+    page_icon="🤖", 
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# Function yo kwinjiza avatar muri Base64
+# Function yo kwinjiza avatar muri Base64 niba ihari
 def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
@@ -23,100 +23,116 @@ def get_base64_of_bin_file(bin_file):
         return None
 
 ASSISTANT_AVATAR = "newone.png"
-img_base64 = get_base64_of_bin_file(ASSISTANT_AVATAR)
 
-if img_base64:
-    img_html = f'<img src="data:image/png;base64,{img_base64}" class="title-avatar">'
-else:
-    img_html = '<span style="font-size: 30px;">🤖</span>'
-
-# Custom CSS yo kwegereza UI nka ChatGPT Clean Dark Interface
-custom_css = f"""
+# Custom CSS yo kwegereza UI 100% ku ifoto ya ChatGPT Mobile
+custom_css = """
 <style>
-/* Overall ChatGPT Dark Background */
-.stApp {{
-    background-color: #212121 !important;
-    color: #ececec;
-}}
+/* Pure Black Background like Mobile OLED Theme */
+.stApp {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
 
-/* Hide default Header & Footer of Streamlit */
-header, footer {{ visibility: hidden; }}
+/* Hide default Streamlit Elements */
+header, footer, [data-testid="stHeader"] { 
+    display: none !important; 
+}
 
-/* Sidebar ChatGPT Design */
-[data-testid="stSidebar"] {{
-    background-color: #171717 !important;
-    border-right: 1px solid #303030;
-}}
+/* Container Spacing */
+.block-container {
+    padding-top: 1rem !important;
+    padding-bottom: 5rem !important;
+    max-width: 600px !important;
+}
 
-/* Chat Container Styling - Clean & Spacing */
-.stChatMessage {{
-    background-color: transparent !important;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}}
-
-.stChatMessage[data-testid="stChatMessageAssistant"] {{
-    background-color: #212121 !important;
-}}
-
-.stChatMessage[data-testid="stChatMessageUser"] {{
-    background-color: #2f2f2f !important;
-    border-radius: 18px;
-    margin-bottom: 10px;
-}}
-
-/* Header Styling */
-.title-container {{
+/* Top App Bar UI */
+.top-bar {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 20px 0;
-}}
+    padding: 10px 0px 25px 0px;
+    border-bottom: 1px solid #1a1a1a;
+    margin-bottom: 20px;
+}
 
-.title-avatar {{
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}}
-
-.floating-title {{
-    font-size: 1.8rem;
+.top-bar-title {
+    font-size: 1.3rem;
     font-weight: 600;
-    color: #ececec;
-    margin: 0;
-}}
+    color: #ffffff;
+}
 
-/* Prompt Cards nka ChatGPT Starter UI */
-.stButton > button {{
+.top-bar-icons {
+    display: flex;
+    gap: 18px;
+    font-size: 1.2rem;
+    color: #cccccc;
+}
+
+/* User Message Bubble - Right Aligned, Dark Rounded Pill */
+.user-msg-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
     width: 100%;
+}
+
+.user-msg-bubble {
+    background-color: #2f2f2f;
+    color: #ffffff;
+    padding: 12px 18px;
+    border-radius: 22px;
+    max-width: 80%;
+    font-size: 1rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* Assistant Message - Left Aligned, Plain Text style */
+.assistant-msg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.assistant-msg-text {
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+/* Action Bar below AI Responses (Copy, Like, Dislike, Audio, Refresh, Share) */
+.action-bar {
+    display: flex;
+    gap: 16px;
+    color: #8e8e93;
+    font-size: 1.05rem;
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+/* Custom Chat Input styling at bottom */
+.stChatInputContainer {
+    background-color: #000000 !important;
+}
+
+.stChatInput > div {
     background-color: #2f2f2f !important;
-    color: #ececec !important;
-    border: 1px solid #424242 !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-    text-align: left !important;
-    transition: all 0.2s ease;
-}}
+    border-radius: 25px !important;
+    border: none !important;
+    color: #ffffff !important;
+}
 
-.stButton > button:hover {{
-    background-color: #383838 !important;
-    border-color: #676767 !important;
-}}
-
-/* Input Box Alignment */
-.stChatInputContainer {{
-    padding-bottom: 20px;
-}}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Load local environment variables
+# Load Environment Variables
 load_dotenv()
 
-# API Key Check
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
@@ -152,106 +168,88 @@ AVAILABLE_MODELS = [
     "mixtral-8x7b-32768"
 ]
 
-# Initialize Chat History
+# Initialize Session State
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Sidebar Navigation (ChatGPT style)
-with st.sidebar:
-    st.markdown("### 💬 Chat Controls")
-    if st.button("➕ New Chat"):
-        st.session_state.messages = []
-        st.rerun()
-        
-    st.markdown("---")
-    st.markdown("### ⚙️ Model Options")
-    selected_model = st.selectbox("Hitamo Model", AVAILABLE_MODELS, index=0)
-    
-    st.markdown("---")
-    st.caption("Developer: **Developer Kevin**")
-    st.caption("Email: therealhacks583@gmail.com")
-
-# Main Page Title
-st.markdown(f'''
-<div class="title-container">
-    {img_html}
-    <h1 class="floating-title">Universal AI Assistant</h1>
+# Top Mobile Navigation Header
+st.markdown("""
+<div class="top-bar">
+    <div style="font-size: 1.4rem; cursor: pointer;">☰</div>
+    <div class="top-bar-title">ChatGPT</div>
+    <div class="top-bar-icons">
+        <span style="cursor: pointer;">📝</span>
+        <span style="cursor: pointer;">⋮</span>
+    </div>
 </div>
-''', unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Display Messages
-for message in st.session_state.messages:
-    avatar_to_use = ASSISTANT_AVATAR if message["role"] == "assistant" else None
-    with st.chat_message(message["role"], avatar=avatar_to_use):
-        st.markdown(message["content"])
-
-# Empty state prompt cards (ChatGPT Home View)
-prompt_from_button = None
-if len(st.session_state.messages) == 0:
-    st.markdown("<h3 style='text-align: center; color: #b4b4b4; margin-bottom: 25px;'>Nkawe nakumfasha iki uyu munsi?</h3>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("💡 **Kwandika Code**\nMfasha gukora aka application mu Python"):
-            prompt_from_button = "Mfasha kwandika application yoroshye mu Python."
-        if st.button("📝 **Ibaruwa y'Akazi**\nAndika ibaruwa isaba akazi muri IT"):
-            prompt_from_button = "Mfasha kwandika ibaruwa isaba akazi mu rwego rwa IT n'ikoranabuhanga."
-    with col2:
-        if st.button("🧠 **Ibibazo & Ibisubizo**\nBaza ikintu cyose uraza gusobanurirwa"):
-            prompt_from_button = "Mbwira uko AI ikora n'uko yafasha mu buzima bwa buri munsi."
-        if st.button("🌐 **Ikinyarwanda**\nKora ikiganiro mu Kinyarwanda cy'umwimerere"):
-            prompt_from_button = "Mwaramutse! Mbwira uwo uri we n'ibyo ushobora kumfasha."
+# Render Chat History exact like image layout
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.markdown(f"""
+        <div class="user-msg-container">
+            <div class="user-msg-bubble">{msg["content"]}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class="assistant-msg-container">
+            <div class="assistant-msg-text">{msg["content"]}</div>
+            <div class="action-bar">
+                <span>📋</span>
+                <span>👍</span>
+                <span>👎</span>
+                <span>🔊</span>
+                <span>🔄</span>
+                <span>🔗</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Chat Input Box
-chat_prompt = st.chat_input("Message Universal AI...")
-prompt = chat_prompt or prompt_from_button
-
-if prompt:
-    # Append & render User message
+if prompt := st.chat_input("Message ChatGPT..."):
+    # Append User Message
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    st.markdown(f"""
+    <div class="user-msg-container">
+        <div class="user-msg-bubble">{prompt}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     groq_messages = [{"role": "system", "content": system_instruction}]
     for msg in st.session_state.messages:
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Render Assistant Response with Streaming (ChatGPT Effect)
-    with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
+    # Generate Response
+    ai_response = None
+    for model_name in AVAILABLE_MODELS:
         try:
-            stream = client.chat.completions.create(
-                model=selected_model,
+            response = client.chat.completions.create(
+                model=model_name,
                 messages=groq_messages,
                 temperature=0.7,
-                stream=True
             )
-            
-            def generate_response():
-                for chunk in stream:
-                    if chunk.choices[0].delta.content:
-                        yield chunk.choices[0].delta.content
+            ai_response = response.choices[0].message.content
+            if ai_response:
+                break
+        except Exception:
+            continue
 
-            ai_response = st.write_stream(generate_response())
-            st.session_state.messages.append({"role": "assistant", "content": ai_response})
-
-        except Exception as e:
-            # Fallback to other models if primary hits rate limit
-            ai_response = None
-            for model_name in AVAILABLE_MODELS:
-                if model_name == selected_model:
-                    continue
-                try:
-                    response = client.chat.completions.create(
-                        model=model_name,
-                        messages=groq_messages,
-                        temperature=0.7,
-                    )
-                    ai_response = response.choices[0].message.content
-                    if ai_response:
-                        st.markdown(ai_response)
-                        st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                        break
-                except Exception:
-                    continue
-
-            if not ai_response:
-                st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze.")
+    if ai_response:
+        st.session_state.messages.append({"role": "assistant", "content": ai_response})
+        st.markdown(f"""
+        <div class="assistant-msg-container">
+            <div class="assistant-msg-text">{ai_response}</div>
+            <div class="action-bar">
+                <span>📋</span>
+                <span>👍</span>
+                <span>👎</span>
+                <span>🔊</span>
+                <span>🔄</span>
+                <span>🔗</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.error("⚠️ Hubayeho ikibazo mu kubona igisubizo. Gerageza tena.")
