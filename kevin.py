@@ -8,7 +8,7 @@ from groq import Groq
 # Page setup - Centered & Mobile Style View
 st.set_page_config(
     page_title="Kevin Universal AI", 
-    page_icon="ai.png", 
+    page_icon="newone.png", 
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -176,7 +176,7 @@ if "messages" not in st.session_state:
 st.markdown("""
 <div class="top-bar">
     <div style="font-size: 1.4rem; cursor: pointer;">☰</div>
-    <div class="top-bar-title">ChatGPT</div>
+    <div class="top-bar-title">Kevin Universal AI</div>
     <div class="top-bar-icons">
         <span style="cursor: pointer;">📝</span>
         <span style="cursor: pointer;">⋮</span>
