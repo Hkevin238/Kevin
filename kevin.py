@@ -208,7 +208,7 @@ for msg in st.session_state.messages:
         """, unsafe_allow_html=True)
 
 # Chat Input Box
-if prompt := st.chat_input("Message ChatGPT..."):
+if prompt := st.chat_input("Ask Kevin Universal AI..."):
     # Append User Message
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.markdown(f"""
@@ -252,4 +252,4 @@ if prompt := st.chat_input("Message ChatGPT..."):
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.error("⚠️ Hubayeho ikibazo mu kubona igisubizo. Gerageza tena.")
+        st.error("⚠️ Habayeho ikibazo mu kubona igisubizo. Gerageza nyuma.")
