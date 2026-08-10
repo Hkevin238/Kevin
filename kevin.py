@@ -7,8 +7,8 @@ from groq import Groq
 
 # Page setup - Centered & Mobile Style View
 st.set_page_config(
-    page_title="ChatGPT", 
-    page_icon="🤖", 
+    page_title="Kevin Universal AI", 
+    page_icon="ai.png", 
     layout="centered",
     initial_sidebar_state="collapsed"
 )
