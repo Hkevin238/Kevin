@@ -154,7 +154,7 @@ with st.sidebar:
     st.divider()
     
     # Clear Chat Feature
-    if st.button("🗑️ Siba Ibiganiro (Clear Chat)", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
         
@@ -170,7 +170,7 @@ st.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("Powered by Groq • Developed by Developer Kevin")
+st.caption("Powered by Kevin • Developed by Developer Kevin")
 
 # Display Messages
 for message in st.session_state.messages:
@@ -181,17 +181,17 @@ for message in st.session_state.messages:
 # Quick Prompt Suggestions (Erekana gusa niba chat ikiri nshya)
 prompt_to_submit = None
 if len(st.session_state.messages) == 0:
-    st.write("💡 **Urugero rw'ibyo yabaza:**")
+    st.write("💡 **Example of what you can ask to:**")
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("🚀 Ndamutsa mu Kinyarwanda"):
-            prompt_to_submit = "Mwaramutse! Mbwira uwo uri we n'uko ushobora kumfasha."
+        if st.button("🚀Greet me in ENG"):
+            prompt_to_submit = "Hello! Tell me who you are and i will be able to assist you."
     with col2:
-        if st.button("💻 Nyereka urugero rwa HTML Code"):
-            prompt_to_submit = "Nyandikira urugero rwa HTML & CSS k'urupapuro rugezweho."
+        if st.button("💻 Show me an example of HTML/Python/C++ Code"):
+            prompt_to_submit = "Write me an HTML & CSS on a modern papersheet."
     with col3:
-        if st.button("📝 Mfasha kwandika Ibaruwa"):
-            prompt_to_submit = "Mfasha kwandika ibaruwa isaba akazi mu buryo bw'umwuga."
+        if st.button("📝 Help me to write a lettter"):
+            prompt_to_submit = "Help me to generate a professional letter for applying a job."
 
 # Chat Input
 user_input = st.chat_input("Ask anything...")
