@@ -8,7 +8,7 @@ from groq import Groq
 # Page setup
 st.set_page_config(page_title="Kevin Universal AI", page_icon="newone.png", layout="centered")
 
-# Agasobanuro k'uburyo bwo kwinjiza ifoto mu buryo buze neza muri HTML CSS
+# Function yo guhindura ifoto mo base64
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -23,7 +23,7 @@ try:
 except Exception:
     img_html = '<span style="font-size: 32px;">🤖</span>'
 
-# Custom CSS yo guhindura Avatar, Rainbow Background, Background Image, na Floating Title Header
+# Custom CSS: Rainbow Background, Floating Header, na Chat Alignment (User Right, AI Left)
 custom_css = f"""
 <style>
 /* Rainbow Animation + Background Image ku page yose */
@@ -41,14 +41,52 @@ custom_css = f"""
     100%{{background-position:0% 82%}}
 }}
 
-/* Chat Container Card semi-transparent styling yo kugaragaza text neza */
-.stChatMessage {{
-    background-color: rgba(26, 28, 36, 0.85) !important;
-    border-radius: 12px;
+/* Container yo gutunganya ubutumwa bwose */
+[data-testid="stChatMessageContent"] {{
+    border-radius: 18px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+}}
+
+/* Ubutumwa bwa User (Kujyana Iburyo - Right side) */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {{
+    flex-direction: row-reverse !important;
+    text-align: right !important;
+}}
+
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stChatMessageContent"] {{
+    background-color: rgba(47, 47, 47, 0.9) !important;
+    color: #ffffff !important;
+    margin-left: auto !important;
+    margin-right: 0px !important;
+    border-radius: 18px 18px 4px 18px !important;
+    max-width: 80% !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }}
 
-/* Floating Title Animation Header (Move Up & Down gake gake + Ifoto) */
+/* Ubutumwa bwa AI / Assistant (Kuba Ibumoso - Left side) */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {{
+    flex-direction: row !important;
+    text-align: left !important;
+}}
+
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stChatMessageContent"] {{
+    background-color: rgba(26, 28, 36, 0.85) !important;
+    color: #ffffff !important;
+    margin-right: auto !important;
+    margin-left: 0px !important;
+    border-radius: 18px 18px 18px 4px !important;
+    max-width: 85% !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}}
+
+/* Guhisha avatar y'umukoresha (User Avatar) */
+[data-testid="stChatMessageAvatarUser"] {{
+    display: none !important;
+}}
+
+/* Floating Title Animation Header */
 .title-container {{
     display: flex;
     align-items: center;
@@ -75,21 +113,15 @@ custom_css = f"""
 }}
 
 @keyframes floatUpDown {{
-    0% {{
-        transform: translateY(0px);
-    }}
-    50% {{
-        transform: translateY(-10px);
-    }}
-    100% {{
-        transform: translateY(0px);
-    }}
+    0% {{ transform: translateY(0px); }}
+    50% {{ transform: translateY(-10px); }}
+    100% {{ transform: translateY(0px); }}
 }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Header nshya irimo ifoto ya newone.png n'inyandiko ya Title
+# Header y'umutwe w'intego (Title)
 st.markdown(f'''
 <div class="title-container">
     {img_html}
@@ -97,19 +129,18 @@ st.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-st.caption("This Kevin Universal AI made for you !.")
+st.caption("This Kevin Universal AI made for you!.")
 
-# Load local environment variables (.env file niba ihari)
+# Load local environment variables (.env)
 load_dotenv()
 
-# Gushaka Groq API Key muri Streamlit Secrets cyangwa muri Environment Variables (.env)
+# Gushaka Groq API Key
 raw_api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not raw_api_key:
     st.error("⚠️ GROQ_API_KEY ntabwo yabonetse! Yishyire muri Streamlit Secrets cyangwa muri .env file.")
     st.stop()
 
-# Clean key String
 api_key = str(raw_api_key).strip()
 
 # Initialize Groq Client
@@ -134,7 +165,6 @@ LANGUAGE AND TONE INSTRUCTIONS:
 - Always align tone and language directly with the user's input language unless requested otherwise.
 """
 
-# List y'amamenyo ya models za Groq
 AVAILABLE_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
@@ -163,9 +193,9 @@ if prompt := st.chat_input("Ask anything..."):
     for msg in st.session_state.messages:
         groq_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Gushaka igisubizo kivuye kuri Groq hamwe n'avatar nshya ya newone.png
+    # Gushaka igisubizo kivuye kuri Groq
     with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-        with st.spinner("Kevin AI thinking......."):
+        with st.status("Kevin AI thinking.......", expanded=False) as status:
             ai_response = None
             last_error = None
             
@@ -178,6 +208,7 @@ if prompt := st.chat_input("Ask anything..."):
                     )
                     ai_response = response.choices[0].message.content
                     if ai_response:
+                        status.update(label="Done!", state="complete", expanded=False)
                         break
                 except Exception as e:
                     last_error = str(e)
@@ -185,8 +216,8 @@ if prompt := st.chat_input("Ask anything..."):
                         time.sleep(2)
                     continue
 
-            if ai_response:
-                st.markdown(ai_response)
-                st.session_state.messages.append({"role": "assistant", "content": ai_response})
-            else:
-                st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
+        if ai_response:
+            st.markdown(ai_response)
+            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+        else:
+            st.error("⚠️ Rate limit yashize ku ma models yose, cyangwa Groq API key yagize ikibazo. Tegereza umunota 1 ugerageze cyangwa uhindure API key.")
